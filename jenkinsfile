@@ -3,13 +3,13 @@ pipeline {
 
     environment {
         NODE_ENV = 'production'
-        FLY_API_TOKEN = credentials('fly_api_token') // Usa credenciales seguras
+        FLY_API_TOKEN = credentials('fly_api_token') // Usar el ID de la credencial
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'deploy-jenkins', url: 'https://github.com/tu-repo.git'
+                git branch: 'deploy-jenkins', url: 'https://github.com/tobalo1986/Prueba-final-jenkins-ci-cd-fly.io.git'
             }
         }
 
