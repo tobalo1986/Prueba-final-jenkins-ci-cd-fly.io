@@ -6,12 +6,10 @@ pipeline {
     }
 
     triggers {
-        // Solo se activa para pushes en la rama 'deploy-jenkins'
         pollSCM('H/5 * * * *') // Verifica el repositorio cada 5 minutos
     }
 
     stages {
-
         stage('Install Fly.io') {
             steps {
                 echo 'Checking if Fly.io is installed...'
@@ -29,6 +27,18 @@ pipeline {
                         echo 'Fly.io already installed.'
                     }
                 }
+            }
+        }
+
+        stage('Install Node.js') {
+            steps {
+                sh '''
+                    # Instalar Node.js si no está disponible
+                    if ! command -v node > /dev/null; then
+                        curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+                        apt-get install -y nodejs
+                    fi
+                '''
             }
         }
 
@@ -74,6 +84,3 @@ pipeline {
         }
     }
 }
-
-
-
