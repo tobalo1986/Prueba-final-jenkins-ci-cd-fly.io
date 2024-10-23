@@ -37,22 +37,9 @@ pipeline {
             }
         }
 
-        stage('Construir imagen Docker') {
-            steps {
-                // Construye la imagen Docker si los tests son exitosos
-                sh '''
-                    # Instalar Docker CLI
-                    apk add --no-cache docker-cli
-
-                    # Construir la imagen Docker
-                    docker build -t flyio-app .
-                '''
-            }
-        }
-
         stage('Desplegar en Fly.io') {
             steps {
-                // Despliega la aplicación en Fly.io tras la construcción
+                // Despliega la aplicación en Fly.io tras la ejecución exitosa de los tests
                 sh '''
                     # Instalar curl
                     apk add --no-cache curl
