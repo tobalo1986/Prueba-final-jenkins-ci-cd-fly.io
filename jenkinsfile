@@ -4,6 +4,7 @@ pipeline {
     environment {
         NODE_ENV = 'production'
         FLY_API_TOKEN = credentials('fly_api_token') 
+    }
 
     triggers {
         githubPush() 
@@ -37,8 +38,8 @@ pipeline {
         stage('Desplegar en Fly.io') {
             steps {
                 sh '''
-                curl -L https://fly.io/install.sh | sh
-                flyctl deploy --config fly.toml --remote-only
+                    curl -L https://fly.io/install.sh | sh
+                    flyctl deploy --config fly.toml --remote-only
                 '''
             }
         }
