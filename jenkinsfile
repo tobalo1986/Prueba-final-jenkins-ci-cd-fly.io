@@ -1,13 +1,12 @@
-pipeline { 
+pipeline {
     agent any
 
     environment {
         NODE_ENV = 'production'
         FLY_API_TOKEN = credentials('fly_api_token') 
-    }
 
     triggers {
-        githubPush()
+        githubPush() 
     }
 
     stages {
@@ -17,25 +16,25 @@ pipeline {
             }
         }
 
-        stage('instalar dependencias') {
+        stage('Instalar dependencias') {
             steps {
                 sh 'npm install'
             }
         }
 
-        stage('Run Tests') {
-            steps {
+        stage('Ejecutar Tests') {
+            steps {  
                 sh 'npm run test'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Construir imagen Docker') {
             steps {
                 sh 'docker build -t flyio-app .'
             }
         }
 
-        stage('deploy-fly.io') {
+        stage('Desplegar en Fly.io') {
             steps {
                 sh '''
                 curl -L https://fly.io/install.sh | sh
@@ -47,7 +46,7 @@ pipeline {
 
     post {
         success {
-            echo 'Despliegue exitoso!'
+            echo '¡Despliegue exitoso!'
         }
         failure {
             echo 'Hubo un fallo en el pipeline.'
