@@ -6,7 +6,8 @@ pipeline {
     }
 
     tools {
-        nodejs 'NodeJS 16'  // Nombre que configuraste en "Global Tool Configuration"
+        nodejs 'NodeJS 16'     // Nombre que le diste a la instalación de Node.js
+        dockerTool 'Docker'     // Nombre que le diste a Docker en "Global Tool Configuration"
     }
 
     stages {
@@ -67,4 +68,3 @@ pipeline {
         }
     }
 }
-
