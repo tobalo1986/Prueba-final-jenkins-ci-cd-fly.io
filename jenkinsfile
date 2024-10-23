@@ -5,25 +5,28 @@ pipeline {
         FLY_API_TOKEN = credentials('fly_api_token')
     }
 
-   
     triggers {
         githubPush() // Trigger para cada push en GitHub
     }
-    
+
     stages {
 
         stage('Install Fly.io') {
             steps {
-                echo 'Installing Fly.io...'
-                withCredentials([string(credentialsId: 'FLY_API_TOKEN', variable: 'FLY_API_TOKEN')]) {
-                    sh '''
-                        # Instalar flyctl si no está ya disponible
-                        curl -L https://fly.io/install.sh | sh
-                        export FLYCTL_INSTALL="/var/jenkins_home/.fly"
-                        export PATH="$FLYCTL_INSTALL/bin:$PATH"
-                        # Autenticarse con Fly.io
-                        fly auth token $FLY_API_TOKEN
-                    '''
+                echo 'Checking if Fly.io is installed...'
+                script {
+                    def flyInstalled = sh(script: 'command -v flyctl || echo "not installed"', returnStdout: true).trim()
+                    if (flyInstalled == "not installed") {
+                        echo 'Installing Fly.io...'
+                        sh '''
+                            curl -L https://fly.io/install.sh | sh
+                            export FLYCTL_INSTALL="/var/jenkins_home/.fly"
+                            export PATH="$FLYCTL_INSTALL/bin:$PATH"
+                            fly auth token $FLY_API_TOKEN
+                        '''
+                    } else {
+                        echo 'Fly.io already installed.'
+                    }
                 }
             }
         }
@@ -34,7 +37,9 @@ pipeline {
             }
             steps {
                 echo 'Installing dependencies...'
-                sh 'npm install'
+                cache(path: './node_modules', key: 'npm-cache') {
+                    sh 'npm install'
+                }
             }
         }
 
@@ -81,6 +86,8 @@ pipeline {
         }
         failure {
             echo 'Hubo un fallo en el pipeline.'
+           
         }
     }
 }
+
