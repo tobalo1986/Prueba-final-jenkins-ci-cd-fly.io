@@ -1,42 +1,25 @@
 pipeline {
-    agent any 
+    agent any
 
     environment {
         FLY_API_TOKEN = credentials('fly_api_token')
     }
 
-    triggers {
-        pollSCM('H/5 * * * *') // Verifica el repositorio cada 5 minutos
+    tools {
+        nodejs 'NodeJS 16'  // Nombre que configuraste en "Global Tool Configuration"
     }
 
     stages {
+
         stage('Install Fly.io') {
             steps {
                 echo 'Checking if Fly.io is installed...'
-                script {
-                    def flyInstalled = sh(script: 'command -v flyctl || echo "not installed"', returnStdout: true).trim()
-                    if (flyInstalled == "not installed") {
-                        echo 'Installing Fly.io...'
-                        sh '''
-                            curl -L https://fly.io/install.sh | sh
-                            export FLYCTL_INSTALL="/var/jenkins_home/.fly"
-                            export PATH="$FLYCTL_INSTALL/bin:$PATH"
-                            fly auth token $FLY_API_TOKEN
-                        '''
-                    } else {
-                        echo 'Fly.io already installed.'
-                    }
-                }
-            }
-        }
-
-        stage('Install Node.js') {
-            steps {
                 sh '''
-                    # Instalar Node.js si no está disponible
-                    if ! command -v node > /dev/null; then
-                        curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-                        apt-get install -y nodejs
+                    if ! command -v flyctl > /dev/null; then
+                        curl -L https://fly.io/install.sh | sh
+                        export FLYCTL_INSTALL="/var/jenkins_home/.fly"
+                        export PATH="$FLYCTL_INSTALL/bin:$PATH"
+                        fly auth token $FLY_API_TOKEN
                     fi
                 '''
             }
@@ -84,3 +67,4 @@ pipeline {
         }
     }
 }
+
