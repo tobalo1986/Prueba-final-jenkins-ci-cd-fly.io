@@ -6,7 +6,8 @@ pipeline {
     }
 
     triggers {
-        githubPush() // Trigger para cada push en GitHub
+        // Solo se activa para pushes en la rama 'deploy-jenkins'
+        pollSCM('H/5 * * * *') // Verifica el repositorio cada 5 minutos
     }
 
     stages {
@@ -32,9 +33,6 @@ pipeline {
         }
 
         stage('Install dependencies') {
-            when {
-                branch 'deploy-jenkins'  // Solo se ejecuta en la rama deploy-jenkins
-            }
             steps {
                 echo 'Installing dependencies...'
                 cache(path: './node_modules', key: 'npm-cache') {
@@ -44,9 +42,6 @@ pipeline {
         }
 
         stage('Run Tests') {
-            when {
-                branch 'deploy-jenkins'  // Solo se ejecuta en la rama deploy-jenkins
-            }
             steps {
                 echo 'Running tests...'
                 sh 'npm run test'
@@ -54,26 +49,18 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            when {
-                branch 'deploy-jenkins'  // Solo se ejecuta en la rama deploy-jenkins
-            }
             steps {
                 echo 'Building Docker image...'
                 sh '''
-                    # Construir la imagen Docker
                     docker build -t flyio-app .
                 '''
             }
         }
 
         stage('Deploy to Fly.io') {
-            when {
-                branch 'deploy-jenkins'  // Solo se ejecuta en la rama deploy-jenkins
-            }
             steps {
                 echo 'Deploying the project to Fly.io...'
                 sh '''
-                    # Desplegar la aplicación en Fly.io
                     /var/jenkins_home/.fly/bin/flyctl deploy --app curso-devops-jenkins --remote-only
                 '''
             }
@@ -86,8 +73,8 @@ pipeline {
         }
         failure {
             echo 'Hubo un fallo en el pipeline.'
-           
         }
     }
 }
+
 
