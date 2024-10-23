@@ -1,13 +1,18 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:14-alpine'
+            args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         NODE_ENV = 'production'
-        FLY_API_TOKEN = credentials('fly_api_token') 
+        FLY_API_TOKEN = credentials('fly_api_token')
     }
 
     triggers {
-        githubPush() 
+        pollSCM('* * * * *')
     }
 
     stages {
@@ -24,21 +29,39 @@ pipeline {
         }
 
         stage('Ejecutar Tests') {
-            steps {  
-                sh 'npm run test'
+            steps {
+                sh 'npm test'
             }
         }
 
         stage('Construir imagen Docker') {
             steps {
-                sh 'docker build -t flyio-app .'
+                sh '''
+                    # Instalar Docker CLI
+                    apk add --no-cache docker-cli
+
+                    # Construir la imagen Docker
+                    docker build -t flyio-app .
+                '''
             }
         }
 
         stage('Desplegar en Fly.io') {
             steps {
                 sh '''
+                    # Instalar curl
+                    apk add --no-cache curl
+
+                    # Instalar Flyctl
                     curl -L https://fly.io/install.sh | sh
+
+                    # Agregar Flyctl al PATH
+                    export PATH=$HOME/.fly/bin:$PATH
+
+                    # Autenticar con Fly.io
+                    flyctl auth token $FLY_API_TOKEN
+
+                    # Desplegar la aplicación
                     flyctl deploy --config fly.toml --remote-only
                 '''
             }
