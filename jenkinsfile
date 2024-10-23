@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'node:14-alpine'
+            image 'node:16-alpine'
             args '-u root:root -v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
@@ -12,30 +12,34 @@ pipeline {
     }
 
     triggers {
-        pollSCM('* * * * *')
+        githubPush() // Trigger para activar el pipeline en cada push a GitHub
     }
 
     stages {
         stage('Checkout') {
             steps {
+                // Realiza el checkout del repositorio en la rama deploy-jenkins
                 git branch: 'deploy-jenkins', url: 'https://github.com/tobalo1986/Prueba-final-jenkins-ci-cd-fly.io.git'
             }
         }
 
         stage('Instalar dependencias') {
             steps {
+                // Instala las dependencias de la aplicación
                 sh 'npm install'
             }
         }
 
         stage('Ejecutar Tests') {
             steps {
+                // Ejecuta los tests de la aplicación
                 sh 'npm test'
             }
         }
 
         stage('Construir imagen Docker') {
             steps {
+                // Construye la imagen Docker si los tests son exitosos
                 sh '''
                     # Instalar Docker CLI
                     apk add --no-cache docker-cli
@@ -48,6 +52,7 @@ pipeline {
 
         stage('Desplegar en Fly.io') {
             steps {
+                // Despliega la aplicación en Fly.io tras la construcción
                 sh '''
                     # Instalar curl
                     apk add --no-cache curl
