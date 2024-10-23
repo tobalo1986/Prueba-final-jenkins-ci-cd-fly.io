@@ -1,9 +1,13 @@
-pipeline {
+pipeline { 
     agent any
 
     environment {
         NODE_ENV = 'production'
         FLY_API_TOKEN = credentials('fly_api_token') 
+    }
+
+    triggers {
+        githubPush() // Trigger para ejecutar el pipeline en cada push al repositorio
     }
 
     stages {
