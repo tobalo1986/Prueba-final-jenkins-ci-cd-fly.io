@@ -7,7 +7,7 @@ pipeline {
     }
 
     triggers {
-        githubPush() // Trigger para ejecutar el pipeline en cada push al repositorio
+        githubPush()
     }
 
     stages {
