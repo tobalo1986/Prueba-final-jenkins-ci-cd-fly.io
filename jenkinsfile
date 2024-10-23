@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         NODE_ENV = 'production'
-        FLY_API_TOKEN = credentials('fly_api_token') // Usar el ID de la credencial
+        FLY_API_TOKEN = credentials('fly_api_token') 
     }
 
     stages {
@@ -13,7 +13,7 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('instalar dependencias') {
             steps {
                 sh 'npm install'
             }
@@ -31,7 +31,7 @@ pipeline {
             }
         }
 
-        stage('Deploy to Fly.io') {
+        stage('deploy-fly.io') {
             steps {
                 sh '''
                 curl -L https://fly.io/install.sh | sh
