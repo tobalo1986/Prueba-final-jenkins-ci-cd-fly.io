@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    environment {
+        FLY_API_TOKEN = credentials('fly_api_token')
+    }
+
+    tools {
+        nodejs 'NodeJS 16'     // Nombre que le diste a la instalación de Node.js
+    }
+
+    triggers {
+        // Trigger para que se ejecute automáticamente con un git push a la rama 'deploy-jenkins'
+        pollSCM('H/5 * * * *') // Revisa el repositorio cada 5 minutos
+    }
+
+    stages {
+
+        stage('Install Fly.io') {
+            steps {
+                echo 'Checking if Fly.io is installed...'
+                sh '''
+                    if ! command -v flyctl > /dev/null; then
+                        curl -L https://fly.io/install.sh | sh
+                        export FLYCTL_INSTALL="/var/jenkins_home/.fly"
+                        export PATH="$FLYCTL_INSTALL/bin:$PATH"
+                        fly auth token $FLY_API_TOKEN
+                    fi
+                '''
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                echo 'Installing dependencies...'
+                sh 'npm install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                echo 'Running tests...'
+                sh 'npm run test'
+            }
+        }
+
+        // Se eliminó la etapa de construcción de Docker
+        // stage('Build Docker Image') {
+        //     steps {
+        //         echo 'Building Docker image...'
+        //         sh '''
+        //             docker build -t flyio-app .
+        //         '''
+        //     }
+        // }
+
+        stage('Deploy to Fly.io') {
+            steps {
+                echo 'Deploying the project to Fly.io...'
+                sh '''
+                    /var/jenkins_home/.fly/bin/flyctl deploy --app curso-devops-jenkins --remote-only
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '¡Despliegue exitoso!'
+        }
+        failure {
+            echo 'Hubo un fallo en el pipeline.'
+        }
+    }
+}
