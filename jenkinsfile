@@ -7,7 +7,11 @@ pipeline {
 
     tools {
         nodejs 'NodeJS 16'     // Nombre que le diste a la instalación de Node.js
-        dockerTool 'Docker'     // Nombre que le diste a Docker en "Global Tool Configuration"
+    }
+
+    triggers {
+        // Trigger para que se ejecute automáticamente con un git push a la rama 'deploy-jenkins'
+        pollSCM('H/5 * * * *') // Revisa el repositorio cada 5 minutos
     }
 
     stages {
@@ -40,14 +44,15 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                echo 'Building Docker image...'
-                sh '''
-                    docker build -t flyio-app .
-                '''
-            }
-        }
+        // Se eliminó la etapa de construcción de Docker
+        // stage('Build Docker Image') {
+        //     steps {
+        //         echo 'Building Docker image...'
+        //         sh '''
+        //             docker build -t flyio-app .
+        //         '''
+        //     }
+        // }
 
         stage('Deploy to Fly.io') {
             steps {
