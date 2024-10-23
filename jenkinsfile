@@ -5,10 +5,7 @@ pipeline {
         FLY_API_TOKEN = credentials('fly_api_token')
     }
 
-    tools {
-        nodejs "nodejs-18"
-    }
-
+   
     triggers {
         githubPush() // Trigger para cada push en GitHub
     }
