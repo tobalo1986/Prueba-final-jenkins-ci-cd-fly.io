@@ -21,8 +21,6 @@ pipeline {
         }
 
         stage('Install dependencies') {
-            when { branch 'deploy-jenkins' }  
-
             steps {
                 echo 'Installing dependencies...'
                 sh 'npm install'
@@ -30,7 +28,6 @@ pipeline {
         }
 
         stage('Run Tests') {
-            when { branch 'deploy-jenkins' }
             steps {
                 echo 'Running tests...'
                 sh 'npm run test'
@@ -38,11 +35,9 @@ pipeline {
         }
 
         stage('Deploy to Fly.io') {
-            when { branch 'deploy-jenkins' }
             steps {
                 echo 'Deploying the project to Fly.io...'
                 sh '''
-                    flyctl auth token $FLY_API_TOKEN
                     flyctl deploy --app prueba-final-jenkins-ci-cd-fly-io --remote-only
                 '''
             }
