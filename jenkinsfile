@@ -2,30 +2,25 @@ pipeline {
     agent any
 
     environment {
-        FLY_API_TOKEN = credentials('fly_api_token')
+        FLY_API_TOKEN = credentials('fly_api_token') 
     }
 
     tools {
-        nodejs 'NodeJS 16'     // Nombre que le diste a la instalación de Node.js
+        nodejs 'NodeJS 16' 
     }
 
     triggers {
-        // Trigger para que se ejecute automáticamente con un git push a la rama 'deploy-jenkins'
-        pollSCM('H/5 * * * *') // Revisa el repositorio cada 5 minutos
+        githubPush() 
     }
 
     stages {
-
-        stage('Install Fly.io') {
+        stage('Install Flyctl') {
             steps {
-                echo 'Checking if Fly.io is installed...'
+                echo 'Installing Flyctl...'
                 sh '''
-                    if ! command -v flyctl > /dev/null; then
-                        curl -L https://fly.io/install.sh | sh
-                        export FLYCTL_INSTALL="/var/jenkins_home/.fly"
-                        export PATH="$FLYCTL_INSTALL/bin:$PATH"
-                        fly auth token $FLY_API_TOKEN
-                    fi
+                    # Descargar e instalar flyctl si no está disponible
+                    curl -L https://fly.io/install.sh | sh
+                    export PATH=$HOME/.fly/bin:$PATH
                 '''
             }
         }
@@ -40,25 +35,17 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo 'Running tests...'
-                sh 'npm run test'
+                sh 'npm test'
             }
         }
-
-        // Se eliminó la etapa de construcción de Docker
-        // stage('Build Docker Image') {
-        //     steps {
-        //         echo 'Building Docker image...'
-        //         sh '''
-        //             docker build -t flyio-app .
-        //         '''
-        //     }
-        // }
 
         stage('Deploy to Fly.io') {
             steps {
                 echo 'Deploying the project to Fly.io...'
                 sh '''
-                    /var/jenkins_home/.fly/bin/flyctl deploy --app curso-devops-jenkins --remote-only
+                    # Desplegar la aplicación en Fly.io
+                    flyctl auth token $FLY_API_TOKEN
+                    flyctl deploy --app prueba-final-jenkins-ci-cd-fly-io --remote-only
                 '''
             }
         }
@@ -73,3 +60,4 @@ pipeline {
         }
     }
 }
+
