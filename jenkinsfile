@@ -10,7 +10,7 @@ pipeline {
     }
 
     triggers {
-        githubPush()  // Este trigger monitorea cualquier push en el repositorio
+        githubPush() 
     }
 
     stages {
@@ -22,7 +22,7 @@ pipeline {
 
         stage('Install dependencies') {
             when { branch 'deploy-jenkins' }  
-            
+
             steps {
                 echo 'Installing dependencies...'
                 sh 'npm install'
