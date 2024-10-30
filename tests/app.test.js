@@ -5,7 +5,7 @@ describe('API Tests', () => {
     it('should return Hello World on GET /', async () => {
         const response = await request(app).get('/');
         expect(response.status).toBe(200);
-        expect(response.body.message).toBe('Hello cristian!');
+        expect(response.body.message).toBe('Hello cristobal!');
     });
 
     it('should echo back the posted data on POST /echo', async () => {
