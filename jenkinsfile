@@ -2,30 +2,27 @@ pipeline {
     agent any
 
     environment {
-        FLY_API_TOKEN = credentials('fly_api_token') 
+        FLY_API_TOKEN = credentials('fly_api_token')
     }
 
     tools {
-        nodejs 'NodeJS 16' 
+        nodejs 'NodeJS 16'     
     }
 
     triggers {
-        githubPush() 
+        githubPush()  // Este trigger monitorea cualquier push en el repositorio
     }
 
     stages {
-        stage('Install Flyctl') {
+        stage('Checkout') {
             steps {
-                echo 'Installing Flyctl...'
-                sh '''
-                    # Descargar e instalar flyctl si no está disponible
-                    curl -L https://fly.io/install.sh | sh
-                    export PATH=$HOME/.fly/bin:$PATH
-                '''
+                git branch: 'deploy-jenkins', url: 'https://github.com/tobalo1986/Prueba-final-jenkins-ci-cd-fly.io.git'
             }
         }
 
         stage('Install dependencies') {
+            when { branch 'deploy-jenkins' }  
+            
             steps {
                 echo 'Installing dependencies...'
                 sh 'npm install'
@@ -33,17 +30,18 @@ pipeline {
         }
 
         stage('Run Tests') {
+            when { branch 'deploy-jenkins' }
             steps {
                 echo 'Running tests...'
-                sh 'npm test'
+                sh 'npm run test'
             }
         }
 
         stage('Deploy to Fly.io') {
+            when { branch 'deploy-jenkins' }
             steps {
                 echo 'Deploying the project to Fly.io...'
                 sh '''
-                    # Desplegar la aplicación en Fly.io
                     flyctl auth token $FLY_API_TOKEN
                     flyctl deploy --app prueba-final-jenkins-ci-cd-fly-io --remote-only
                 '''
@@ -60,4 +58,3 @@ pipeline {
         }
     }
 }
-
