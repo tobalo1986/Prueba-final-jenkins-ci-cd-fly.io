@@ -6,11 +6,11 @@ pipeline {
     }
 
     tools {
-        nodejs 'NodeJS 16'     
+        nodejs 'NodeJS 16'
     }
 
     triggers {
-        githubPush() 
+        githubPush()
     }
 
     stages {
@@ -34,10 +34,22 @@ pipeline {
             }
         }
 
+        stage('Install Fly.io CLI') {
+            steps {
+                echo 'Installing Fly.io CLI...'
+                sh '''
+                    curl -L https://fly.io/install.sh | sh
+                    export FLYCTL_INSTALL="$HOME/.fly"
+                    export PATH="$FLYCTL_INSTALL/bin:$PATH"
+                '''
+            }
+        }
+
         stage('Deploy to Fly.io') {
             steps {
                 echo 'Deploying the project to Fly.io...'
                 sh '''
+                    export PATH=$HOME/.fly/bin:$PATH
                     flyctl deploy --app prueba-final-jenkins-ci-cd-fly-io --remote-only
                 '''
             }
@@ -53,3 +65,4 @@ pipeline {
         }
     }
 }
+
