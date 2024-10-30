@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        FLY_API_TOKEN = credentials('fly_api_token')
+    }
+
+    tools {
+        nodejs 'NodeJS 16'
+    }
+
+    triggers {
+        githubPush()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'deploy-jenkins', url: 'https://github.com/tobalo1986/Prueba-final-jenkins-ci-cd-fly.io.git'
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                echo 'Installing dependencies...'
+                sh 'npm install'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                echo 'Running tests...'
+                sh 'npm run test'
+            }
+        }
+
+        stage('Install Fly.io CLI') {
+            steps {
+                echo 'Installing Fly.io CLI...'
+                sh '''
+                    curl -L https://fly.io/install.sh | sh
+                    export FLYCTL_INSTALL="$HOME/.fly"
+                    export PATH="$FLYCTL_INSTALL/bin:$PATH"
+                '''
+            }
+        }
+
+        stage('Deploy to Fly.io') {
+            steps {
+                echo 'Deploying the project to Fly.io...'
+                sh '''
+                    export PATH=$HOME/.fly/bin:$PATH
+                    flyctl deploy --app prueba-final-jenkins-ci-cd-fly-io --remote-only
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '¡Despliegue exitoso!'
+        }
+        failure {
+            echo 'Hubo un fallo en el pipeline.'
+        }
+    }
+}
+
